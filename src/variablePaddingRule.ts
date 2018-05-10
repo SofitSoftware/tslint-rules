@@ -1,6 +1,6 @@
 import * as Lint from 'tslint';
 // tslint:disable-next-line:no-implicit-dependencies
-import { getPreviousStatement, getNextStatement } from 'tsutils';
+import { getNextStatement, getPreviousStatement } from 'tsutils';
 import * as ts from 'typescript';
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -43,7 +43,7 @@ class VariablePaddingWalker extends Lint.AbstractWalker<void> {
 
 		if (prev) {
 
-			const prevLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getStart(this.sourceFile)).line;
+			const prevLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getEnd()).line;
 
 			if (prevLine === line - 1 && prev.kind !== ts.SyntaxKind.VariableStatement) {
 
