@@ -101,7 +101,7 @@
 			"allow-empty-class",
 			"allow-constructor-only"
 		],
-		"no-unsafe-any": true,
+		"no-unsafe-any": false,
 		"no-unused-expression": true,
 		"no-unused-variable": true,
 		"no-use-before-declare": true,
