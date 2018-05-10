@@ -1,0 +1,25 @@
+{
+	"name": "sofit-tslint-rules",
+	"version": "0.1.0",
+	"description": "Sofit View tslint rules",
+	"main": "tslint.json",
+	"scripts": {
+		"build": "tsc --skipLibCheck rules/*.ts"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/SofitSoftware/tslint-rules.git"
+	},
+	"author": "rhogeranacleto@gmail.com",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/SofitSoftware/tslint-rules/issues"
+	},
+	"dependencies": {
+		"typescript": "^2.8.3",
+		"@types/node": "^9.6.6",
+		"tslint": "^5.9.1",
+		"tslint-eslint-rules": "^5.1.0"
+	},
+	"homepage": "https://github.com/SofitSoftware/tslint-rules#readme"
+}

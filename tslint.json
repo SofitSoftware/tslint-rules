@@ -1,0 +1,209 @@
+{
+	"defaultSeverity": "error",
+	"extends": [
+		"tslint:recommended",
+		"tslint-eslint-rules"
+	],
+	"jsRules": {},
+	"linterOptions": {
+		"exclude": [
+			"rules/**"
+		]
+	},
+	"rules": {
+		"if-padding": true,
+		"for-padding": true,
+		"function-padding": true,
+		"arrow-function-padding": true,
+		"method-padding": true,
+		"class-padding": true,
+		"constructor-padding": true,
+		"try-catch-padding": true,
+		"variable-padding": true,
+		"max-method-lines": true,
+		"member-access": [
+			true
+		],
+		"member-ordering": [
+			true,
+			{
+				"order": [
+					"private-instance-field",
+					"public-instance-field",
+					"protected-instance-field",
+					"private-static-field",
+					"public-static-field",
+					"protected-static-field",
+					"private-constructor",
+					"public-constructor",
+					"protected-constructor",
+					"private-instance-method",
+					"public-instance-method",
+					"protected-instance-method",
+					"private-static-method",
+					"public-static-method",
+					"protected-static-method"
+				]
+			}
+		],
+		"max-classes-per-file": false,
+		"no-any": true,
+		"no-empty-interface": true,
+		"no-import-side-effect": false,
+		"no-inferrable-types": true,
+		"no-magic-numbers": false,
+		"no-non-null-assertion": true,
+		"no-parameter-reassignment": true,
+		"no-unnecessary-type-assertion": true,
+		"no-var-requires": true,
+		"only-arrow-functions": false,
+		"prefer-for-of": true,
+		"promise-function-async": false,
+		"await-promise": true,
+		"ban-comma-operator": true,
+		"curly": true,
+		"no-arg": true,
+		"no-bitwise": true,
+		"no-conditional-assignment": true,
+		"no-console": [
+			true,
+			"log",
+			"info"
+		],
+		"no-construct": true,
+		"no-debugger": true,
+		"no-duplicate-super": true,
+		"no-duplicate-switch-case": true,
+		"no-dynamic-delete": true,
+		"no-empty": false,
+		"no-eval": true,
+		"no-floating-promises": true,
+		"no-for-in-array": true,
+		"no-implicit-dependencies": true,
+		"no-invalid-template-strings": true,
+		"no-invalid-this": true,
+		"no-null-keyword": false,
+		"no-object-literal-type-assertion": true,
+		"no-return-await": true,
+		"no-shadowed-variable": true,
+		"no-sparse-arrays": true,
+		"no-string-literal": true,
+		"no-submodule-imports": false,
+		"no-switch-case-fall-through": true,
+		"no-this-assignment": [
+			true,
+			{
+				"allow-destructuring": true
+			}
+		],
+		"no-unnecessary-class": [
+			true,
+			"allow-empty-class",
+			"allow-constructor-only"
+		],
+		"no-unsafe-any": true,
+		"no-unused-expression": true,
+		"no-unused-variable": true,
+		"no-use-before-declare": true,
+		"no-var-keyword": true,
+		"no-void-expression": true,
+		"prefer-conditional-expression": true,
+		"restrict-plus-operands": true,
+		"strict-boolean-expressions": true,
+		"triple-equals": true,
+		"cyclomatic-complexity": [
+			true,
+			20
+		],
+		"eofline": false,
+		"indent": [
+			true,
+			"tabs",
+			4
+		],
+		"max-file-line-count": [
+			true,
+			300
+		],
+		"max-line-length": [
+			true,
+			120
+		],
+		"no-default-export": true,
+		"no-duplicate-imports": true,
+		"no-require-imports": true,
+		"object-literal-sort-keys": false,
+		"prefer-const": true,
+		"prefer-readonly": true,
+		"trailing-comma": [
+			true,
+			{
+				"multiline": "never"
+			}
+		],
+		"arrow-parens": [
+			true,
+			"ban-single-arg-parens"
+		],
+		"arrow-return-shorthand": true,
+		"binary-expression-operand-order": true,
+		"class-name": true,
+		"import-spacing": true,
+		"newline-before-return": true,
+		"no-boolean-literal-compare": true,
+		"no-consecutive-blank-lines": [
+			true,
+			1
+		],
+		"no-irregular-whitespace": true,
+		"no-trailing-whitespace": true,
+		"no-unnecessary-callback-wrapper": true,
+		"no-unnecessary-initializer": true,
+		"object-literal-key-quotes": [
+			true,
+			"consistent"
+		],
+		"one-variable-per-declaration": true,
+		"prefer-method-signature": true,
+		"prefer-switch": true,
+		"prefer-template": [
+			true,
+			"allow-single-concat"
+		],
+		"quotemark": [
+			true,
+			"single"
+		],
+		"return-undefined": false,
+		"semicolon": [
+			true,
+			"always"
+		],
+		"space-before-function-paren": false,
+		"ter-newline-after-var": [
+			false,
+			"always"
+		],
+		"no-extra-semi": true,
+		"ter-no-irregular-whitespace": [
+			true
+		],
+		"ter-no-sparse-arrays": [
+			true
+		],
+		"no-multi-spaces": [
+			true
+		],
+		"array-bracket-spacing": [
+			true,
+			"never"
+		],
+		"brace-style": [
+			true,
+			"1tbs"
+		]
+	},
+	"rulesDirectory": [
+		"rules"
+	]
+}
