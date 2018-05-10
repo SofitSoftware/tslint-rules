@@ -33,6 +33,7 @@ class MethodPaddingWalker extends Lint.AbstractWalker<void> {
 		return ts.forEachChild(sourceFile, cb);
 	}
 
+	// tslint:disable-next-line:max-method-lines
 	public visitMethodDeclaration(node: ts.MethodDeclaration) {
 
 		const prev = getPreviousToken(node);
@@ -60,9 +61,9 @@ class MethodPaddingWalker extends Lint.AbstractWalker<void> {
 
 		let stop = false;
 
-		const bodyLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.body!.getChildAt(0).getStart()).line
+		const bodyLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.body!.getChildAt(0).getStart()).line;
 
-		const modifierStart = node.modifiers!.filter(n => n.kind === ts.SyntaxKind.PublicKeyword)[0].getStart()
+		const modifierStart = node.modifiers!.filter(n => n.kind === ts.SyntaxKind.PublicKeyword)[0].getStart();
 
 		node.body!.forEachChild(n => {
 

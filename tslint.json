@@ -5,11 +5,6 @@
 		"tslint-eslint-rules"
 	],
 	"jsRules": {},
-	"linterOptions": {
-		"exclude": [
-			"rules/**"
-		]
-	},
 	"rules": {
 		"if-padding": true,
 		"for-padding": true,
@@ -201,6 +196,11 @@
 		"brace-style": [
 			true,
 			"1tbs"
+		],
+		"variable-name": [
+			true,
+			"allow-pascal-case",
+			"allow-snake-case"
 		]
 	},
 	"rulesDirectory": [
