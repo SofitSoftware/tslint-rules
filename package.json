@@ -1,6 +1,6 @@
 {
 	"name": "@sofit/tslint-rules",
-	"version": "0.1.5",
+	"version": "0.1.6",
 	"description": "Sofit View tslint rules",
 	"main": "tslint.json",
 	"scripts": {
