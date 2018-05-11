@@ -65,7 +65,14 @@ class MethodPaddingWalker extends Lint.AbstractWalker<void> {
 
 			const bodyLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.body.getChildAt(0).getStart()).line;
 
-			const modifier = node.modifiers.filter(n => n.kind === ts.SyntaxKind.PublicKeyword);
+			const modifier = node.modifiers.filter(n => {
+
+				return [
+					ts.SyntaxKind.PublicKeyword,
+					ts.SyntaxKind.PrivateKeyword,
+					ts.SyntaxKind.ProtectedKeyword
+				].indexOf(n.kind) >= 0;
+			});
 
 			if (modifier.length) {
 
