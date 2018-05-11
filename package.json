@@ -4,7 +4,7 @@
 	"description": "Sofit View tslint rules",
 	"main": "tslint.json",
 	"scripts": {
-		"build": "tsc --skipLibCheck -d true --outDir rules src/*.ts"
+		"build": "tsc -w --skipLibCheck -d true --outDir rules src/*.ts"
 	},
 	"repository": {
 		"type": "git",
