@@ -33,6 +33,7 @@ class ForPaddingWalker extends Lint.AbstractWalker<void> {
 		return ts.forEachChild(sourceFile, cb);
 	}
 
+	// tslint:disable-next-line:max-method-lines
 	public visitForDeclaration(node: ts.ClassDeclaration) {
 
 		const prev = getPreviousStatement(node);
@@ -61,32 +62,40 @@ class ForPaddingWalker extends Lint.AbstractWalker<void> {
 		}
 
 		const children = node.getChildren();
+
 		const openBrace = children.filter(n => n.kind === ts.SyntaxKind.OpenBraceToken)[0];
+		const openBraceLine = ts.getLineAndCharacterOfPosition(this.sourceFile, openBrace.getStart(this.sourceFile)).line;
+
 		const closeBrace = children.filter(n => n.kind === ts.SyntaxKind.CloseBraceToken)[0];
+		const closeBraceStart = closeBrace.getStart(this.sourceFile);
+		const closeBraceLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeBraceStart).line;
 
-		const nextOpenBraceToken = getNextToken(openBrace);
+		if (openBraceLine !== closeBraceLine) {
 
-		if (nextOpenBraceToken) {
+			const nextOpenBraceToken = getNextToken(openBrace);
 
-			const nextBraceTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, nextOpenBraceToken.getStart(this.sourceFile)).line;
+			if (nextOpenBraceToken) {
 
-			if (nextBraceTokenLine === line + 1) {
+				// tslint:disable-next-line:max-line-length
+				const nextBraceTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, nextOpenBraceToken.getStart(this.sourceFile)).line;
 
-				this.addFailure(classStatementStart, classStatementStart, Rule.NEW_LINE_AFTER);
+				if (nextBraceTokenLine === openBraceLine + 1) {
+
+					this.addFailure(classStatementStart, classStatementStart, Rule.NEW_LINE_AFTER);
+				}
 			}
-		}
 
-		const nextCloseBraceToken = getPreviousToken(closeBrace);
+			const nextCloseBraceToken = getPreviousToken(closeBrace);
 
-		if (nextCloseBraceToken) {
+			if (nextCloseBraceToken) {
 
-			const closeBraceStart = closeBrace.getStart(this.sourceFile);
-			const closeBraceLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeBraceStart).line;
-			const nextBraceTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, nextCloseBraceToken.getStart(this.sourceFile)).line;
+				// tslint:disable-next-line:max-line-length
+				const nextBraceTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, nextCloseBraceToken.getStart(this.sourceFile)).line;
 
-			if (nextBraceTokenLine !== closeBraceLine - 1) {
+				if (nextBraceTokenLine !== closeBraceLine - 1) {
 
-				this.addFailure(closeBraceStart, closeBraceStart, Rule.NEW_LINE_END);
+					this.addFailure(closeBraceStart, closeBraceStart, Rule.NEW_LINE_END);
+				}
 			}
 		}
 	}
