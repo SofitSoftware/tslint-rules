@@ -41,7 +41,7 @@ class VariablePaddingWalker extends Lint.AbstractWalker<void> {
 
 		const next = getNextStatement(node);
 
-		if (prev) {
+		if (prev && line > 0) {
 
 			const prevLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getEnd()).line;
 

@@ -65,7 +65,7 @@ class ArrowFunctionPaddingWalker extends Lint.AbstractWalker<void> {
 
 			let stop = false;
 
-			if (node.body) {
+			if (node.body && node.body.getFirstToken().kind === ts.SyntaxKind.OpenBraceToken) {
 
 				node.body.forEachChild(n => {
 

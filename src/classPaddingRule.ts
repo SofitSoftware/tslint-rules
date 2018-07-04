@@ -42,22 +42,25 @@ class ForPaddingWalker extends Lint.AbstractWalker<void> {
 
 		const classStatementStart = node.getChildren().filter(n => n.kind === ts.SyntaxKind.ClassKeyword)[0].getStart();
 
-		if (prev) {
+		if (line > 0) {
 
-			const prevStartLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getStart(this.sourceFile)).line;
-			const prevEndLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getEnd()).line;
+			if (prev) {
 
-			if (prevStartLine === line - 1 || prevEndLine === line - 1) {
-				// Previous statement is on the same or previous line
-				this.addFailure(classStatementStart, classStatementStart, Rule.NEW_LINE_BEFORE);
-			}
-		} else if (node.parent) {
+				const prevStartLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getStart(this.sourceFile)).line;
+				const prevEndLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getEnd()).line;
 
-			const parentLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.parent.getStart(this.sourceFile)).line;
+				if (prevStartLine === line - 1 || prevEndLine === line - 1) {
+					// Previous statement is on the same or previous line
+					this.addFailure(classStatementStart, classStatementStart, Rule.NEW_LINE_BEFORE);
+				}
+			} else if (node.parent) {
 
-			if (parentLine >= line - 1) {
+				const parentLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.parent.getStart(this.sourceFile)).line;
 
-				this.addFailure(classStatementStart, classStatementStart, Rule.NEW_LINE_BEFORE);
+				if (parentLine >= line - 1) {
+
+					this.addFailure(classStatementStart, classStatementStart, Rule.NEW_LINE_BEFORE);
+				}
 			}
 		}
 
