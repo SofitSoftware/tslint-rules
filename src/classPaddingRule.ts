@@ -57,7 +57,7 @@ class ForPaddingWalker extends Lint.AbstractWalker<void> {
 
 				const parentLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.parent.getStart(this.sourceFile)).line;
 
-				if (parentLine >= line - 1) {
+				if (parentLine === line - 1) {
 
 					this.addFailure(classStatementStart, classStatementStart, Rule.NEW_LINE_BEFORE);
 				}

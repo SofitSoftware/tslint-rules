@@ -22,7 +22,7 @@ class FunctionPaddingWalker extends Lint.AbstractWalker<void> {
 
 		const cb = (node: ts.Node): void => {
 
-			if (node.kind === ts.SyntaxKind.FunctionDeclaration) {
+			if (node.kind === ts.SyntaxKind.FunctionDeclaration || node.kind === ts.SyntaxKind.FunctionExpression) {
 
 				this.visitFunctionDeclaration(node as ts.FunctionDeclaration);
 			}
@@ -56,7 +56,7 @@ class FunctionPaddingWalker extends Lint.AbstractWalker<void> {
 
 				const parentLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.parent.getStart(this.sourceFile)).line;
 
-				if (parentLine >= line - 1) {
+				if (parentLine === line - 1) {
 
 					this.addFailure(functionStatementStart, functionStatementStart, Rule.NEW_LINE_BEFORE);
 				}
