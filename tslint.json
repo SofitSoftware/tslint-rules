@@ -15,6 +15,7 @@
 		"constructor-padding": true,
 		"try-catch-padding": true,
 		"variable-padding": true,
+		"last-line": true,
 		"max-method-lines": true,
 		"member-access": [
 			true
@@ -98,7 +99,7 @@
 		],
 		"no-unsafe-any": false,
 		"no-unused-expression": true,
-		"no-unused-variable": true,
+		"no-unused-variable": false,
 		"no-use-before-declare": true,
 		"no-var-keyword": true,
 		"no-void-expression": true,
