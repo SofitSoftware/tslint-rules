@@ -3,17 +3,9 @@ import * as Lint from 'tslint';
 import { getPreviousToken } from 'tsutils';
 import * as ts from 'typescript';
 
-export class Rule extends Lint.Rules.AbstractRule {
-
-	public static NEW_LINE_BEFORE = 'Missing blank line before constructor';
-	public static NEW_LINE_AFTER = 'Missing blank line after constructor';
-	public static NEW_LINE_END = 'Not allowed blank line before constructor ends';
-
-	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-
-		return this.applyWithWalker(new ConstructorPaddingWalker(sourceFile, this.ruleName, undefined));
-	}
-}
+const NEW_LINE_BEFORE = 'Missing blank line before constructor';
+const NEW_LINE_AFTER = 'Missing blank line after constructor';
+const NEW_LINE_END = 'Not allowed blank line before constructor ends';
 
 // The walker takes care of all the work.
 class ConstructorPaddingWalker extends Lint.AbstractWalker<void> {
@@ -35,9 +27,19 @@ class ConstructorPaddingWalker extends Lint.AbstractWalker<void> {
 
 	public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
 
-		const prev = getPreviousToken(node);
 		const start = node.getStart(this.sourceFile);
 		const line = ts.getLineAndCharacterOfPosition(this.sourceFile, start).line;
+
+		this.checkPrev(node, line, start);
+
+		this.checkParent(node, line, start);
+
+		this.checkBody(node, start);
+	}
+
+	private checkPrev(node: ts.ConstructorDeclaration, line: number, start: number) {
+
+		const prev = getPreviousToken(node);
 
 		if (prev) {
 
@@ -46,17 +48,25 @@ class ConstructorPaddingWalker extends Lint.AbstractWalker<void> {
 
 			if (prevStartLine === line - 1 || prevEndLine === line - 1) {
 
-				this.addFailure(start, start, Rule.NEW_LINE_BEFORE);
+				this.addFailure(start, start, NEW_LINE_BEFORE);
 			}
-		} else if (node.parent) {
+		}
+	}
+
+	private checkParent(node: ts.ConstructorDeclaration, line: number, start: number) {
+
+		if (node.parent) {
 
 			const parentLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.parent.getStart(this.sourceFile)).line;
 
 			if (parentLine >= line - 1) {
 
-				this.addFailure(start, start, Rule.NEW_LINE_BEFORE);
+				this.addFailure(start, start, NEW_LINE_BEFORE);
 			}
 		}
+	}
+
+	private checkBody(node: ts.ConstructorDeclaration, start: number) {
 
 		if (node.body && Boolean(node.body.getChildAt(1).getText().trim())) {
 
@@ -65,6 +75,7 @@ class ConstructorPaddingWalker extends Lint.AbstractWalker<void> {
 			const openBraceLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.body.getChildAt(0).getStart()).line;
 
 			node.body.getChildAt(1).getChildren().forEach(n => {
+
 				if (stop) {
 
 					return;
@@ -74,7 +85,7 @@ class ConstructorPaddingWalker extends Lint.AbstractWalker<void> {
 
 				if (firstChildLine <= openBraceLine + 1) {
 
-					this.addFailure(start, start, Rule.NEW_LINE_AFTER);
+					this.addFailure(start, start, NEW_LINE_AFTER);
 				}
 
 				stop = true;
@@ -95,9 +106,17 @@ class ConstructorPaddingWalker extends Lint.AbstractWalker<void> {
 
 					const closeStart = closeBracket.getStart();
 
-					this.addFailure(closeStart, closeStart, Rule.NEW_LINE_END);
+					this.addFailure(closeStart, closeStart, NEW_LINE_END);
 				}
 			}
 		}
+	}
+}
+
+export class Rule extends Lint.Rules.AbstractRule {
+
+	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+
+		return this.applyWithWalker(new ConstructorPaddingWalker(sourceFile, this.ruleName, undefined));
 	}
 }

@@ -3,17 +3,9 @@ import * as Lint from 'tslint';
 import { getPreviousToken } from 'tsutils';
 import * as ts from 'typescript';
 
-export class Rule extends Lint.Rules.AbstractRule {
-
-	public static NEW_LINE_BEFORE = 'Missing blank line before function declaration';
-	public static NEW_LINE_AFTER = 'Missing blank line after function declaration';
-	public static NEW_LINE_END = 'Not allowed blank line before function ends';
-
-	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-
-		return this.applyWithWalker(new ArrowFunctionPaddingWalker(sourceFile, this.ruleName, undefined));
-	}
-}
+const NEW_LINE_BEFORE = 'Missing blank line before arrow function declaration';
+const NEW_LINE_AFTER = 'Missing blank line after arrow function declaration';
+const NEW_LINE_END = 'Not allowed blank line before arrow function ends';
 
 // The walker takes care of all the work.
 class ArrowFunctionPaddingWalker extends Lint.AbstractWalker<void> {
@@ -24,7 +16,7 @@ class ArrowFunctionPaddingWalker extends Lint.AbstractWalker<void> {
 
 			if (node.kind === ts.SyntaxKind.ArrowFunction) {
 
-				this.visitFunctionDeclaration(node as ts.ArrowFunction);
+				this.visitArrowFunctionDeclaration(node as ts.ArrowFunction);
 			}
 
 			return ts.forEachChild(node, cb);
@@ -33,9 +25,8 @@ class ArrowFunctionPaddingWalker extends Lint.AbstractWalker<void> {
 		return ts.forEachChild(sourceFile, cb);
 	}
 
-	public visitFunctionDeclaration(node: ts.ArrowFunction) {
+	public visitArrowFunctionDeclaration(node: ts.ArrowFunction) {
 
-		const prev = getPreviousToken(node);
 		const start = node.getStart(this.sourceFile);
 		const line = ts.getLineAndCharacterOfPosition(this.sourceFile, start).line;
 		const endLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.getEnd()).line;
@@ -44,65 +35,92 @@ class ArrowFunctionPaddingWalker extends Lint.AbstractWalker<void> {
 
 			const arrowFunctionEnd = node.equalsGreaterThanToken.getEnd();
 
-			if (prev) {
+			this.checkPrev(node, line, start, arrowFunctionEnd);
 
-				const prevStartLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getStart(this.sourceFile)).line;
-				const prevEndLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getEnd()).line;
+			this.checkParent(node, line, start, arrowFunctionEnd);
 
-				if (prevStartLine === line - 1 || prevEndLine === line - 1) {
+			this.checkBody(node, line, start, arrowFunctionEnd);
+		}
+	}
 
-					this.addFailure(start, arrowFunctionEnd, Rule.NEW_LINE_BEFORE);
-				}
-			} else if (node.parent) {
+	private checkPrev(node: ts.ArrowFunction, line: number, start: number, arrowFunctionEnd: number) {
 
-				const parentLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.parent.getStart(this.sourceFile)).line;
+		const prev = getPreviousToken(node);
 
-				if (parentLine >= line - 1) {
+		if (prev) {
 
-					this.addFailure(start, arrowFunctionEnd, Rule.NEW_LINE_BEFORE);
-				}
+			const prevStartLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getStart(this.sourceFile)).line;
+			const prevEndLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getEnd()).line;
+
+			if (prevStartLine === line - 1 || prevEndLine === line - 1) {
+
+				this.addFailure(start, arrowFunctionEnd, NEW_LINE_BEFORE);
 			}
+		}
+	}
 
-			let stop = false;
+	private checkParent(node: ts.ArrowFunction, line: number, start: number, arrowFunctionEnd: number) {
 
-			if (node.body && node.body.getFirstToken().kind === ts.SyntaxKind.OpenBraceToken) {
+		if (node.parent) {
 
-				node.body.forEachChild(n => {
+			const parentLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.parent.getStart(this.sourceFile)).line;
 
-					if (stop) {
+			if (parentLine === line - 1) {
 
-						return;
-					}
+				this.addFailure(start, arrowFunctionEnd, NEW_LINE_BEFORE);
+			}
+		}
+	}
 
-					const firstChildLine = ts.getLineAndCharacterOfPosition(this.sourceFile, n.getStart(this.sourceFile)).line;
+	private checkBody(node: ts.ArrowFunction, line: number, start: number, arrowFunctionEnd: number) {
 
-					if (firstChildLine <= line + 1) {
+		let stop = false;
 
-						this.addFailure(start, arrowFunctionEnd, Rule.NEW_LINE_AFTER);
-					}
+		if (node.body && node.body.getFirstToken().kind === ts.SyntaxKind.OpenBraceToken) {
 
-					stop = true;
-				});
+			node.body.forEachChild(n => {
 
-				const closeBracket = node.body.getLastToken(this.sourceFile);
-				const closeBracketStart = closeBracket.getStart(this.sourceFile);
-				const closeBracketLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeBracketStart).line;
+				if (stop) {
 
-				const lastBlockStatement = getPreviousToken(closeBracket);
+					return;
+				}
 
-				if (lastBlockStatement) {
+				const firstChildLine = ts.getLineAndCharacterOfPosition(this.sourceFile, n.getStart(this.sourceFile)).line;
 
-					const previousTokenStart = lastBlockStatement.getStart(this.sourceFile);
-					const previousTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, previousTokenStart).line;
+				if (firstChildLine <= line + 1) {
 
-					if (previousTokenLine !== closeBracketLine - 1) {
+					this.addFailure(start, arrowFunctionEnd, NEW_LINE_AFTER);
+				}
 
-						const closeStart = closeBracket.getStart();
+				stop = true;
+			});
 
-						this.addFailure(closeStart, closeStart, Rule.NEW_LINE_END);
-					}
+			const closeBracket = node.body.getLastToken(this.sourceFile);
+			const closeBracketStart = closeBracket.getStart(this.sourceFile);
+			const closeBracketLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeBracketStart).line;
+
+			const lastBlockStatement = getPreviousToken(closeBracket);
+
+			if (lastBlockStatement) {
+
+				const previousTokenStart = lastBlockStatement.getStart(this.sourceFile);
+				const previousTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, previousTokenStart).line;
+
+				if (previousTokenLine !== closeBracketLine - 1) {
+
+					const closeStart = closeBracket.getStart();
+
+					this.addFailure(closeStart, closeStart, NEW_LINE_END);
 				}
 			}
 		}
+	}
+}
+
+export class Rule extends Lint.Rules.AbstractRule {
+
+	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+
+		return this.applyWithWalker(new ArrowFunctionPaddingWalker(sourceFile, this.ruleName, undefined));
 	}
 }

@@ -3,17 +3,9 @@ import * as Lint from 'tslint';
 import { getPreviousToken } from 'tsutils';
 import * as ts from 'typescript';
 
-export class Rule extends Lint.Rules.AbstractRule {
-
-	public static NEW_LINE_BEFORE = 'Missing blank line before method declaration';
-	public static NEW_LINE_AFTER = 'Missing blank line after method declaration';
-	public static NEW_LINE_END = 'Not allowed blank line before method ends';
-
-	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-
-		return this.applyWithWalker(new MethodPaddingWalker(sourceFile, this.ruleName, undefined));
-	}
-}
+const NEW_LINE_BEFORE = 'Missing blank line before method declaration';
+const NEW_LINE_AFTER = 'Missing blank line after method declaration';
+const NEW_LINE_END = 'Not allowed blank line before method ends';
 
 // The walker takes care of all the work.
 class MethodPaddingWalker extends Lint.AbstractWalker<void> {
@@ -33,12 +25,21 @@ class MethodPaddingWalker extends Lint.AbstractWalker<void> {
 		return ts.forEachChild(sourceFile, cb);
 	}
 
-	// tslint:disable-next-line:max-method-lines
 	public visitMethodDeclaration(node: ts.MethodDeclaration) {
 
-		const prev = getPreviousToken(node);
 		const start = node.getStart(this.sourceFile);
 		const line = ts.getLineAndCharacterOfPosition(this.sourceFile, start).line;
+
+		this.checkPrev(node, line, start);
+
+		this.checkParent(node, line, start);
+
+		this.checkBody(node);
+	}
+
+	private checkPrev(node: ts.MethodDeclaration, line: number, start: number) {
+
+		const prev = getPreviousToken(node);
 
 		if (prev) {
 
@@ -47,17 +48,25 @@ class MethodPaddingWalker extends Lint.AbstractWalker<void> {
 
 			if (prevStartLine === line - 1 || prevEndLine === line - 1) {
 				// Previous statement is on the same or previous line
-				this.addFailure(start, start, Rule.NEW_LINE_BEFORE);
+				this.addFailure(start, start, NEW_LINE_BEFORE);
 			}
-		} else if (node.parent) {
+		}
+	}
+
+	private checkParent(node: ts.MethodDeclaration, line: number, start: number) {
+
+		if (node.parent) {
 
 			const parentLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.parent.getStart(this.sourceFile)).line;
 
 			if (parentLine >= line - 1) {
 
-				this.addFailure(start, start, Rule.NEW_LINE_BEFORE);
+				this.addFailure(start, start, NEW_LINE_BEFORE);
 			}
 		}
+	}
+
+	private checkBody(node: ts.MethodDeclaration) {
 
 		let stop = false;
 
@@ -89,7 +98,7 @@ class MethodPaddingWalker extends Lint.AbstractWalker<void> {
 
 					if (firstChildLine <= bodyLine + 1) {
 
-						this.addFailure(modifierStart, modifierStart, Rule.NEW_LINE_AFTER);
+						this.addFailure(modifierStart, modifierStart, NEW_LINE_AFTER);
 					}
 
 					stop = true;
@@ -111,9 +120,17 @@ class MethodPaddingWalker extends Lint.AbstractWalker<void> {
 
 					const closeStart = closeBracket.getStart();
 
-					this.addFailure(closeStart, closeStart, Rule.NEW_LINE_END);
+					this.addFailure(closeStart, closeStart, NEW_LINE_END);
 				}
 			}
 		}
+	}
+}
+
+export class Rule extends Lint.Rules.AbstractRule {
+
+	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+
+		return this.applyWithWalker(new MethodPaddingWalker(sourceFile, this.ruleName, undefined));
 	}
 }

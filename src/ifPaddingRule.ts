@@ -3,18 +3,10 @@ import * as Lint from 'tslint';
 import { getPreviousStatement, getPreviousToken } from 'tsutils';
 import * as ts from 'typescript';
 
-export class Rule extends Lint.Rules.AbstractRule {
-
-	public static NEW_LINE_BEFORE = 'Missing blank line before if';
-	public static NEW_LINE_AFTER = 'Missing blank line after if';
-	public static NEW_LINE_END = 'Not allowed blank line before if ends';
-	public static NEW_LINE_AFTER_ELSE = 'Missing blank line after else';
-
-	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-
-		return this.applyWithWalker(new IfPaddingWalker(sourceFile, this.ruleName, undefined));
-	}
-}
+const NEW_LINE_BEFORE = 'Missing blank line before if';
+const NEW_LINE_AFTER = 'Missing blank line after if';
+const NEW_LINE_END = 'Not allowed blank line before if ends';
+const NEW_LINE_AFTER_ELSE = 'Missing blank line after else';
 
 // The walker takes care of all the work.
 class IfPaddingWalker extends Lint.AbstractWalker<void> {
@@ -36,9 +28,23 @@ class IfPaddingWalker extends Lint.AbstractWalker<void> {
 
 	public visitIfDeclaration(node: ts.IfStatement) {
 
-		const prev = getPreviousStatement(node);
 		const start = node.getStart(this.sourceFile);
 		const line = ts.getLineAndCharacterOfPosition(this.sourceFile, start).line;
+
+		this.checkPrev(node, line, start);
+
+		this.checkParent(node, line, start);
+
+		this.checkBody(node, line, start);
+
+		this.checkLastBlock(node);
+
+		this.checkElse(node);
+	}
+
+	private checkPrev(node: ts.IfStatement, line: number, start: number) {
+
+		const prev = getPreviousStatement(node);
 
 		if (prev) {
 
@@ -47,17 +53,25 @@ class IfPaddingWalker extends Lint.AbstractWalker<void> {
 
 			if (prevStartLine === line - 1 || prevEndLine === line - 1) {
 
-				this.addFailure(start, start, Rule.NEW_LINE_BEFORE);
+				this.addFailure(start, start, NEW_LINE_BEFORE);
 			}
-		} else if (node.parent) {
+		}
+	}
+
+	private checkParent(node: ts.IfStatement, line: number, start: number) {
+
+		if (node.parent) {
 
 			const parentLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.parent.getStart(this.sourceFile)).line;
 
 			if (parentLine >= line - 1) {
 
-				this.addFailure(start, start, Rule.NEW_LINE_BEFORE);
+				this.addFailure(start, start, NEW_LINE_BEFORE);
 			}
 		}
+	}
+
+	private checkBody(node: ts.IfStatement, line: number, start: number) {
 
 		let stop = false;
 
@@ -72,11 +86,14 @@ class IfPaddingWalker extends Lint.AbstractWalker<void> {
 
 			if (firstChildLine <= line + 1) {
 
-				this.addFailure(start, start, Rule.NEW_LINE_AFTER);
+				this.addFailure(start, start, NEW_LINE_AFTER);
 			}
 
 			stop = true;
 		});
+	}
+
+	private checkLastBlock(node: ts.IfStatement) {
 
 		const closeBracket = node.thenStatement.getLastToken(this.sourceFile);
 		const closeBracketStart = closeBracket.getStart(this.sourceFile);
@@ -93,9 +110,12 @@ class IfPaddingWalker extends Lint.AbstractWalker<void> {
 
 				const closeStart = closeBracket.getStart();
 
-				this.addFailure(closeStart, closeStart, Rule.NEW_LINE_END);
+				this.addFailure(closeStart, closeStart, NEW_LINE_END);
 			}
 		}
+	}
+
+	private checkElse(node: ts.IfStatement) {
 
 		if (node.elseStatement) {
 
@@ -123,7 +143,7 @@ class IfPaddingWalker extends Lint.AbstractWalker<void> {
 
 						if (p) {
 
-							this.addFailure(p.getStart(this.sourceFile), p.getStart(this.sourceFile), Rule.NEW_LINE_AFTER_ELSE);
+							this.addFailure(p.getStart(this.sourceFile), p.getStart(this.sourceFile), NEW_LINE_AFTER_ELSE);
 						}
 					}
 
@@ -145,10 +165,18 @@ class IfPaddingWalker extends Lint.AbstractWalker<void> {
 
 						const closeStart = elseCloseBracket.getStart();
 
-						this.addFailure(closeStart, closeStart, Rule.NEW_LINE_END);
+						this.addFailure(closeStart, closeStart, NEW_LINE_END);
 					}
 				}
 			}
 		}
+	}
+}
+
+export class Rule extends Lint.Rules.AbstractRule {
+
+	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+
+		return this.applyWithWalker(new IfPaddingWalker(sourceFile, this.ruleName, undefined));
 	}
 }

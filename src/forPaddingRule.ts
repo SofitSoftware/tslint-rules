@@ -3,17 +3,9 @@ import * as Lint from 'tslint';
 import { getPreviousStatement, getPreviousToken } from 'tsutils';
 import * as ts from 'typescript';
 
-export class Rule extends Lint.Rules.AbstractRule {
-
-	public static NEW_LINE_BEFORE = 'Missing blank line before for';
-	public static NEW_LINE_AFTER = 'Missing blank line after for';
-	public static NEW_LINE_END = 'Not allowed blank line before for ends';
-
-	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-
-		return this.applyWithWalker(new ForPaddingWalker(sourceFile, this.ruleName, undefined));
-	}
-}
+const NEW_LINE_BEFORE = 'Missing blank line before for';
+const NEW_LINE_AFTER = 'Missing blank line after for';
+const NEW_LINE_END = 'Not allowed blank line before for ends';
 
 // The walker takes care of all the work.
 class ForPaddingWalker extends Lint.AbstractWalker<void> {
@@ -22,7 +14,11 @@ class ForPaddingWalker extends Lint.AbstractWalker<void> {
 
 		const cb = (node: ts.Node): void => {
 
-			if ([ts.SyntaxKind.ForStatement, ts.SyntaxKind.ForInStatement, ts.SyntaxKind.ForOfStatement].indexOf(node.kind) >= 0) {
+			if ([
+				ts.SyntaxKind.ForStatement,
+				ts.SyntaxKind.ForInStatement,
+				ts.SyntaxKind.ForOfStatement
+			].indexOf(node.kind) >= 0) {
 
 				this.visitForDeclaration(node as ts.ForStatement);
 			}
@@ -35,9 +31,21 @@ class ForPaddingWalker extends Lint.AbstractWalker<void> {
 
 	public visitForDeclaration(node: ts.ForStatement) {
 
-		const prev = getPreviousStatement(node);
 		const start = node.getStart(this.sourceFile);
 		const line = ts.getLineAndCharacterOfPosition(this.sourceFile, start).line;
+
+		this.checkPrev(node, line, start);
+
+		this.checkParent(node, line, start);
+
+		this.checkStatement(node, line, start);
+
+		this.checkLastBlock(node);
+	}
+
+	private checkPrev(node: ts.ForStatement, line: number, start: number) {
+
+		const prev = getPreviousStatement(node);
 
 		if (prev) {
 
@@ -46,17 +54,25 @@ class ForPaddingWalker extends Lint.AbstractWalker<void> {
 
 			if (prevStartLine === line - 1 || prevEndLine === line - 1) {
 				// Previous statement is on the same or previous line
-				this.addFailure(start, start, Rule.NEW_LINE_BEFORE);
+				this.addFailure(start, start, NEW_LINE_BEFORE);
 			}
-		} else if (node.parent) {
+		}
+	}
+
+	private checkParent(node: ts.ForStatement, line: number, start: number) {
+
+		if (node.parent) {
 
 			const parentLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.parent.getStart(this.sourceFile)).line;
 
 			if (parentLine >= line - 1) {
 
-				this.addFailure(start, start, Rule.NEW_LINE_BEFORE);
+				this.addFailure(start, start, NEW_LINE_BEFORE);
 			}
 		}
+	}
+
+	private checkStatement(node: ts.ForStatement, line: number, start: number) {
 
 		let stop = false;
 
@@ -71,11 +87,14 @@ class ForPaddingWalker extends Lint.AbstractWalker<void> {
 
 			if (firstChildLine <= line + 1) {
 
-				this.addFailure(start, start, Rule.NEW_LINE_AFTER);
+				this.addFailure(start, start, NEW_LINE_AFTER);
 			}
 
 			stop = true;
 		});
+	}
+
+	private checkLastBlock(node: ts.ForStatement) {
 
 		const closeBracket = node.statement.getLastToken(this.sourceFile);
 		const closeBracketStart = closeBracket.getStart(this.sourceFile);
@@ -92,8 +111,16 @@ class ForPaddingWalker extends Lint.AbstractWalker<void> {
 
 				const closeStart = closeBracket.getStart();
 
-				this.addFailure(closeStart, closeStart, Rule.NEW_LINE_END);
+				this.addFailure(closeStart, closeStart, NEW_LINE_END);
 			}
 		}
+	}
+}
+
+export class Rule extends Lint.Rules.AbstractRule {
+
+	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+
+		return this.applyWithWalker(new ForPaddingWalker(sourceFile, this.ruleName, undefined));
 	}
 }

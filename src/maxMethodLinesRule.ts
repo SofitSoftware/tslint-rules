@@ -1,17 +1,8 @@
 import * as Lint from 'tslint';
 import * as ts from 'typescript';
 
-export class Rule extends Lint.Rules.AbstractRule {
-
-	public static MAX_LINES = 25;
-
-	public static MAX_METHOD_LINES = `Max method lines is ${Rule.MAX_LINES}`;
-
-	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-
-		return this.applyWithWalker(new MethodPaddingWalker(sourceFile, this.ruleName, undefined));
-	}
-}
+const MAX_LINES = 25;
+const MAX_METHOD_LINES = `Max method lines is ${MAX_LINES}`;
 
 // The walker takes care of all the work.
 class MethodPaddingWalker extends Lint.AbstractWalker<void> {
@@ -34,19 +25,30 @@ class MethodPaddingWalker extends Lint.AbstractWalker<void> {
 	public visitMethodDeclaration(node: ts.MethodDeclaration) {
 
 		const start = node.getStart(this.sourceFile);
-		const closeBracket = node.body!.getLastToken(this.sourceFile);
-		const closeBracketStart = closeBracket.getStart(this.sourceFile);
 
 		if (node.body) {
 
+			const closeBracket = node.body.getLastToken(this.sourceFile);
+			const closeBracketStart = closeBracket.getStart(this.sourceFile);
 			const block = node.body.getChildAt(1).getChildren();
 			const firstBlockLine = ts.getLineAndCharacterOfPosition(this.sourceFile, block[0].getStart(this.sourceFile)).line;
-			const lastBlockLine = ts.getLineAndCharacterOfPosition(this.sourceFile, block[block.length - 1].getStart(this.sourceFile)).line;
+			const lastBlockLine = ts.getLineAndCharacterOfPosition(
+				this.sourceFile,
+				block[block.length - 1].getStart(this.sourceFile)
+			).line;
 
-			if (lastBlockLine - firstBlockLine >= Rule.MAX_LINES) {
+			if (lastBlockLine - firstBlockLine >= MAX_LINES) {
 
-				this.addFailure(start, closeBracketStart, Rule.MAX_METHOD_LINES);
+				this.addFailure(start, closeBracketStart, MAX_METHOD_LINES);
 			}
 		}
+	}
+}
+
+export class Rule extends Lint.Rules.AbstractRule {
+
+	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+
+		return this.applyWithWalker(new MethodPaddingWalker(sourceFile, this.ruleName, undefined));
 	}
 }

@@ -3,18 +3,10 @@ import * as Lint from 'tslint';
 import { getPreviousStatement, getPreviousToken } from 'tsutils';
 import * as ts from 'typescript';
 
-export class Rule extends Lint.Rules.AbstractRule {
-
-	public static NEW_LINE_BEFORE = 'Missing blank line before try';
-	public static NEW_LINE_AFTER = 'Missing blank line after try';
-	public static NEW_LINE_END = 'Not allowed blank line before try ends';
-	public static NEW_LINE_AFTER_CATCH = 'Missing blank line after catch';
-
-	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-
-		return this.applyWithWalker(new TryCatchPaddingWalker(sourceFile, this.ruleName, undefined));
-	}
-}
+const NEW_LINE_BEFORE = 'Missing blank line before try';
+const NEW_LINE_AFTER = 'Missing blank line after try';
+const NEW_LINE_END = 'Not allowed blank line before try ends';
+const NEW_LINE_AFTER_CATCH = 'Missing blank line after catch';
 
 // The walker takes care of all the work.
 class TryCatchPaddingWalker extends Lint.AbstractWalker<void> {
@@ -36,9 +28,23 @@ class TryCatchPaddingWalker extends Lint.AbstractWalker<void> {
 
 	public visitIfDeclaration(node: ts.TryStatement) {
 
-		const prev = getPreviousStatement(node);
 		const start = node.getStart(this.sourceFile);
 		const line = ts.getLineAndCharacterOfPosition(this.sourceFile, start).line;
+
+		this.checkPrev(node, line, start);
+
+		this.checkParent(node, line, start);
+
+		this.checkTryBlock(node, line, start);
+
+		this.checkLastBlock(node);
+
+		this.checkCatchBlock(node);
+	}
+
+	private checkPrev(node: ts.TryStatement, line: number, start: number) {
+
+		const prev = getPreviousStatement(node);
 
 		if (prev) {
 
@@ -47,17 +53,25 @@ class TryCatchPaddingWalker extends Lint.AbstractWalker<void> {
 
 			if (prevStartLine === line - 1 || prevEndLine === line - 1) {
 
-				this.addFailure(start, start, Rule.NEW_LINE_BEFORE);
+				this.addFailure(start, start, NEW_LINE_BEFORE);
 			}
-		} else if (node.parent) {
+		}
+	}
+
+	private checkParent(node: ts.TryStatement, line: number, start: number) {
+
+		if (node.parent) {
 
 			const parentLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.parent.getStart(this.sourceFile)).line;
 
 			if (parentLine >= line - 1) {
 
-				this.addFailure(start, start, Rule.NEW_LINE_BEFORE);
+				this.addFailure(start, start, NEW_LINE_BEFORE);
 			}
 		}
+	}
+
+	private checkTryBlock(node: ts.TryStatement, line: number, start: number) {
 
 		let stop = false;
 
@@ -72,11 +86,14 @@ class TryCatchPaddingWalker extends Lint.AbstractWalker<void> {
 
 			if (firstChildLine <= line + 1) {
 
-				this.addFailure(start, start, Rule.NEW_LINE_AFTER);
+				this.addFailure(start, start, NEW_LINE_AFTER);
 			}
 
 			stop = true;
 		});
+	}
+
+	private checkLastBlock(node: ts.TryStatement) {
 
 		const closeBracket = node.tryBlock.getLastToken(this.sourceFile);
 		const closeBracketStart = closeBracket.getStart(this.sourceFile);
@@ -93,9 +110,12 @@ class TryCatchPaddingWalker extends Lint.AbstractWalker<void> {
 
 				const closeStart = closeBracket.getStart();
 
-				this.addFailure(closeStart, closeStart, Rule.NEW_LINE_END);
+				this.addFailure(closeStart, closeStart, NEW_LINE_END);
 			}
 		}
+	}
+
+	private checkCatchBlock(node: ts.TryStatement) {
 
 		if (node.catchClause) {
 
@@ -119,9 +139,12 @@ class TryCatchPaddingWalker extends Lint.AbstractWalker<void> {
 
 				if (firstChildLine === catchLine + 1) {
 
-					const p = catchStatement.getChildren().filter(n => n.kind === ts.SyntaxKind.CatchKeyword)[0].getStart(this.sourceFile);
+					const p = catchStatement.getChildren().filter(it => {
 
-					this.addFailure(p, p, Rule.NEW_LINE_AFTER_CATCH);
+						return it.kind === ts.SyntaxKind.CatchKeyword;
+					})[0].getStart(this.sourceFile);
+
+					this.addFailure(p, p, NEW_LINE_AFTER_CATCH);
 				}
 
 				stop = true;
@@ -142,9 +165,17 @@ class TryCatchPaddingWalker extends Lint.AbstractWalker<void> {
 
 					const closeStart = catchCloseBracket.getStart();
 
-					this.addFailure(closeStart, closeStart, Rule.NEW_LINE_END);
+					this.addFailure(closeStart, closeStart, NEW_LINE_END);
 				}
 			}
 		}
+	}
+}
+
+export class Rule extends Lint.Rules.AbstractRule {
+
+	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+
+		return this.applyWithWalker(new TryCatchPaddingWalker(sourceFile, this.ruleName, undefined));
 	}
 }

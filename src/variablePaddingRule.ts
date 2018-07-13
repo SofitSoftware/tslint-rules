@@ -3,17 +3,8 @@ import * as Lint from 'tslint';
 import { getNextStatement, getPreviousStatement } from 'tsutils';
 import * as ts from 'typescript';
 
-export class Rule extends Lint.Rules.AbstractRule {
-
-	public static NEW_LINE_BEFORE = 'Missing blank line before variable declaration';
-	public static NEW_LINE_AFTER = 'Missing blank line after variable declaration';
-	public static NEW_LINE_END = 'Not allowed blank line before for ends';
-
-	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-
-		return this.applyWithWalker(new VariablePaddingWalker(sourceFile, this.ruleName, undefined));
-	}
-}
+const NEW_LINE_BEFORE = 'Missing blank line before variable declaration';
+const NEW_LINE_AFTER = 'Missing blank line after variable declaration';
 
 // The walker takes care of all the work.
 class VariablePaddingWalker extends Lint.AbstractWalker<void> {
@@ -47,7 +38,7 @@ class VariablePaddingWalker extends Lint.AbstractWalker<void> {
 
 			if (prevLine === line - 1 && prev.kind !== ts.SyntaxKind.VariableStatement) {
 
-				this.addFailure(start, start, Rule.NEW_LINE_BEFORE);
+				this.addFailure(start, start, NEW_LINE_BEFORE);
 			}
 		}
 
@@ -55,10 +46,18 @@ class VariablePaddingWalker extends Lint.AbstractWalker<void> {
 
 			const nextLine = ts.getLineAndCharacterOfPosition(this.sourceFile, next.getStart(this.sourceFile)).line;
 
-			if (nextLine === line + 1 && next.kind !== ts.SyntaxKind.VariableStatement) {
+			if (nextLine === (line + 1) && next.kind !== ts.SyntaxKind.VariableStatement) {
 
-				this.addFailure(start, start, Rule.NEW_LINE_AFTER);
+				this.addFailure(start, start, NEW_LINE_AFTER);
 			}
 		}
+	}
+}
+
+export class Rule extends Lint.Rules.AbstractRule {
+
+	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+
+		return this.applyWithWalker(new VariablePaddingWalker(sourceFile, this.ruleName, undefined));
 	}
 }

@@ -3,17 +3,9 @@ import * as Lint from 'tslint';
 import { getNextToken, getPreviousStatement, getPreviousToken } from 'tsutils';
 import * as ts from 'typescript';
 
-export class Rule extends Lint.Rules.AbstractRule {
-
-	public static NEW_LINE_BEFORE = 'Missing blank line before class declaration';
-	public static NEW_LINE_AFTER = 'Missing blank line after class declaration';
-	public static NEW_LINE_END = 'Not allowed blank line before class declaration ends';
-
-	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-
-		return this.applyWithWalker(new ForPaddingWalker(sourceFile, this.ruleName, undefined));
-	}
-}
+const NEW_LINE_BEFORE = 'Missing blank line before class declaration';
+const NEW_LINE_AFTER = 'Missing blank line after class declaration';
+const NEW_LINE_END = 'Not allowed blank line before class declaration ends';
 
 // The walker takes care of all the work.
 class ForPaddingWalker extends Lint.AbstractWalker<void> {
@@ -24,7 +16,7 @@ class ForPaddingWalker extends Lint.AbstractWalker<void> {
 
 			if (node.kind === ts.SyntaxKind.ClassDeclaration) {
 
-				this.visitForDeclaration(node as ts.ClassDeclaration);
+				this.visitClassDeclaration(node as ts.ClassDeclaration);
 			}
 
 			return ts.forEachChild(node, cb);
@@ -33,10 +25,8 @@ class ForPaddingWalker extends Lint.AbstractWalker<void> {
 		return ts.forEachChild(sourceFile, cb);
 	}
 
-	// tslint:disable-next-line:max-method-lines
-	public visitForDeclaration(node: ts.ClassDeclaration) {
+	public visitClassDeclaration(node: ts.ClassDeclaration) {
 
-		const prev = getPreviousStatement(node);
 		const start = node.getStart(this.sourceFile);
 		const line = ts.getLineAndCharacterOfPosition(this.sourceFile, start).line;
 
@@ -44,25 +34,44 @@ class ForPaddingWalker extends Lint.AbstractWalker<void> {
 
 		if (line > 0) {
 
-			if (prev) {
+			this.checkPrev(node, line, classStatementStart);
 
-				const prevStartLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getStart(this.sourceFile)).line;
-				const prevEndLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getEnd()).line;
+			this.checkParent(node, line, classStatementStart);
+		}
 
-				if (prevStartLine === line - 1 || prevEndLine === line - 1) {
-					// Previous statement is on the same or previous line
-					this.addFailure(classStatementStart, classStatementStart, Rule.NEW_LINE_BEFORE);
-				}
-			} else if (node.parent) {
+		this.checkBody(node, classStatementStart);
+	}
 
-				const parentLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.parent.getStart(this.sourceFile)).line;
+	private checkPrev(node: ts.ClassDeclaration, line: number, classStatementStart: number) {
 
-				if (parentLine === line - 1) {
+		const prev = getPreviousStatement(node);
 
-					this.addFailure(classStatementStart, classStatementStart, Rule.NEW_LINE_BEFORE);
-				}
+		if (prev) {
+
+			const prevStartLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getStart(this.sourceFile)).line;
+			const prevEndLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getEnd()).line;
+
+			if (prevStartLine === line - 1 || prevEndLine === line - 1) {
+				// Previous statement is on the same or previous line
+				this.addFailure(classStatementStart, classStatementStart, NEW_LINE_BEFORE);
 			}
 		}
+	}
+
+	private checkParent(node: ts.ClassDeclaration, line: number, classStatementStart: number) {
+
+		if (node.parent) {
+
+			const parentLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.parent.getStart(this.sourceFile)).line;
+
+			if (parentLine === line - 1) {
+
+				this.addFailure(classStatementStart, classStatementStart, NEW_LINE_BEFORE);
+			}
+		}
+	}
+
+	private checkBody(node: ts.ClassDeclaration, classStatementStart: number) {
 
 		const children = node.getChildren();
 
@@ -84,7 +93,7 @@ class ForPaddingWalker extends Lint.AbstractWalker<void> {
 
 				if (nextBraceTokenLine === openBraceLine + 1) {
 
-					this.addFailure(classStatementStart, classStatementStart, Rule.NEW_LINE_AFTER);
+					this.addFailure(classStatementStart, classStatementStart, NEW_LINE_AFTER);
 				}
 			}
 
@@ -97,9 +106,17 @@ class ForPaddingWalker extends Lint.AbstractWalker<void> {
 
 				if (nextBraceTokenLine !== closeBraceLine - 1) {
 
-					this.addFailure(closeBraceStart, closeBraceStart, Rule.NEW_LINE_END);
+					this.addFailure(closeBraceStart, closeBraceStart, NEW_LINE_END);
 				}
 			}
 		}
+	}
+}
+
+export class Rule extends Lint.Rules.AbstractRule {
+
+	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+
+		return this.applyWithWalker(new ForPaddingWalker(sourceFile, this.ruleName, undefined));
 	}
 }

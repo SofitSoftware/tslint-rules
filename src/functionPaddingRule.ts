@@ -3,17 +3,9 @@ import * as Lint from 'tslint';
 import { getPreviousStatement, getPreviousToken } from 'tsutils';
 import * as ts from 'typescript';
 
-export class Rule extends Lint.Rules.AbstractRule {
-
-	public static NEW_LINE_BEFORE = 'Missing blank line before function declaration';
-	public static NEW_LINE_AFTER = 'Missing blank line after function declaration';
-	public static NEW_LINE_END = 'Not allowed blank line before function ends';
-
-	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-
-		return this.applyWithWalker(new FunctionPaddingWalker(sourceFile, this.ruleName, undefined));
-	}
-}
+const NEW_LINE_BEFORE = 'Missing blank line before function declaration';
+const NEW_LINE_AFTER = 'Missing blank line after function declaration';
+const NEW_LINE_END = 'Not allowed blank line before function ends';
 
 // The walker takes care of all the work.
 class FunctionPaddingWalker extends Lint.AbstractWalker<void> {
@@ -33,72 +25,108 @@ class FunctionPaddingWalker extends Lint.AbstractWalker<void> {
 		return ts.forEachChild(sourceFile, cb);
 	}
 
-	// tslint:disable-next-line
 	public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
 
-		const prev = getPreviousStatement(node);
 		const start = node.getStart(this.sourceFile);
 		const line = ts.getLineAndCharacterOfPosition(this.sourceFile, start).line;
 		const functionStatementStart = node.getChildren().filter(n => n.kind === ts.SyntaxKind.FunctionKeyword)[0].getStart();
 
 		if (line > 0) {
 
-			if (prev) {
+			this.checkPrev(node, line, functionStatementStart);
 
-				const prevStartLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getStart(this.sourceFile)).line;
-				const prevEndLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getEnd()).line;
+			this.checkParent(node, line, functionStatementStart);
+		}
 
-				if (prevStartLine === line - 1 || prevEndLine === line - 1) {
-					// Previous statement is on the same or previous line
-					this.addFailure(functionStatementStart, functionStatementStart, Rule.NEW_LINE_BEFORE);
-				}
-			} else if (node.parent) {
+		this.checkBody(node, line, functionStatementStart);
 
-				const parentLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.parent.getStart(this.sourceFile)).line;
+		this.checkLastBlock(node);
+	}
 
-				if (parentLine === line - 1) {
+	private checkPrev(node: ts.FunctionDeclaration, line: number, functionStatementStart: number) {
 
-					this.addFailure(functionStatementStart, functionStatementStart, Rule.NEW_LINE_BEFORE);
-				}
+		const prev = getPreviousStatement(node);
+
+		if (prev) {
+
+			const prevStartLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getStart(this.sourceFile)).line;
+			const prevEndLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getEnd()).line;
+
+			if (prevStartLine === line - 1 || prevEndLine === line - 1) {
+				// Previous statement is on the same or previous line
+				this.addFailure(functionStatementStart, functionStatementStart, NEW_LINE_BEFORE);
 			}
 		}
+	}
+
+	private checkParent(node: ts.FunctionDeclaration, line: number, functionStatementStart: number) {
+
+		if (node.parent) {
+
+			const parentLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.parent.getStart(this.sourceFile)).line;
+
+			if (parentLine === line - 1) {
+
+				this.addFailure(functionStatementStart, functionStatementStart, NEW_LINE_BEFORE);
+			}
+		}
+	}
+
+	private checkBody(node: ts.FunctionDeclaration, line: number, functionStatementStart: number) {
 
 		let stop = false;
 
-		node.body!.forEachChild(n => {
+		if (node.body) {
 
-			if (stop) {
+			node.body.forEachChild(n => {
 
-				return;
-			}
+				if (stop) {
 
-			const firstChildLine = ts.getLineAndCharacterOfPosition(this.sourceFile, n.getStart(this.sourceFile)).line;
+					return;
+				}
 
-			if (firstChildLine <= line + 1) {
+				const firstChildLine = ts.getLineAndCharacterOfPosition(this.sourceFile, n.getStart(this.sourceFile)).line;
 
-				this.addFailure(functionStatementStart, functionStatementStart, Rule.NEW_LINE_AFTER);
-			}
+				if (firstChildLine <= line + 1) {
 
-			stop = true;
-		});
+					this.addFailure(functionStatementStart, functionStatementStart, NEW_LINE_AFTER);
+				}
 
-		const closeBracket = node.body!.getLastToken(this.sourceFile);
-		const closeBracketStart = closeBracket.getStart(this.sourceFile);
-		const closeBracketLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeBracketStart).line;
+				stop = true;
+			});
+		}
+	}
 
-		const lastBlockStatement = getPreviousToken(closeBracket);
+	private checkLastBlock(node: ts.FunctionDeclaration) {
 
-		if (lastBlockStatement) {
+		if (node.body) {
 
-			const previousTokenStart = lastBlockStatement.getStart(this.sourceFile);
-			const previousTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, previousTokenStart).line;
+			const closeBracket = node.body.getLastToken(this.sourceFile);
+			const closeBracketStart = closeBracket.getStart(this.sourceFile);
+			const closeBracketLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeBracketStart).line;
 
-			if (previousTokenLine !== closeBracketLine - 1) {
+			const lastBlockStatement = getPreviousToken(closeBracket);
 
-				const closeStart = closeBracket.getStart();
+			if (lastBlockStatement) {
 
-				this.addFailure(closeStart, closeStart, Rule.NEW_LINE_END);
+				const previousTokenStart = lastBlockStatement.getStart(this.sourceFile);
+				const previousTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, previousTokenStart).line;
+
+				if (previousTokenLine !== closeBracketLine - 1) {
+
+					const closeStart = closeBracket.getStart();
+
+					this.addFailure(closeStart, closeStart, NEW_LINE_END);
+				}
 			}
 		}
+	}
+}
+
+export class Rule extends Lint.Rules.AbstractRule {
+
+	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+
+		return this.applyWithWalker(new FunctionPaddingWalker(sourceFile, this.ruleName, undefined));
 	}
 }
