@@ -102,7 +102,7 @@
 		"no-unused-variable": false,
 		"no-use-before-declare": true,
 		"no-var-keyword": true,
-		"no-void-expression": true,
+		"no-void-expression": false,
 		"prefer-conditional-expression": true,
 		"restrict-plus-operands": true,
 		"strict-boolean-expressions": false,
