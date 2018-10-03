@@ -63,8 +63,7 @@
 		"no-conditional-assignment": true,
 		"no-console": [
 			true,
-			"log",
-			"info"
+			"log"
 		],
 		"no-construct": true,
 		"no-debugger": true,
