@@ -96,21 +96,25 @@ class IfPaddingWalker extends Lint.AbstractWalker<void> {
 	private checkLastBlock(node: ts.IfStatement) {
 
 		const closeBracket = node.thenStatement.getLastToken(this.sourceFile);
-		const closeBracketStart = closeBracket.getStart(this.sourceFile);
-		const closeBracketLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeBracketStart).line;
 
-		const lastBlockStatement = getPreviousToken(closeBracket);
+		if (closeBracket) {
 
-		if (lastBlockStatement) {
+			const closeBracketStart = closeBracket.getStart(this.sourceFile);
+			const closeBracketLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeBracketStart).line;
 
-			const previousTokenStart = lastBlockStatement.getStart(this.sourceFile);
-			const previousTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, previousTokenStart).line;
+			const lastBlockStatement = getPreviousToken(closeBracket);
 
-			if (previousTokenLine !== closeBracketLine - 1) {
+			if (lastBlockStatement) {
 
-				const closeStart = closeBracket.getStart();
+				const previousTokenStart = lastBlockStatement.getStart(this.sourceFile);
+				const previousTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, previousTokenStart).line;
 
-				this.addFailure(closeStart, closeStart, NEW_LINE_END);
+				if (previousTokenLine !== closeBracketLine - 1) {
+
+					const closeStart = closeBracket.getStart();
+
+					this.addFailure(closeStart, closeStart, NEW_LINE_END);
+				}
 			}
 		}
 	}
@@ -139,11 +143,16 @@ class IfPaddingWalker extends Lint.AbstractWalker<void> {
 
 					if (firstChildLine === elseLine + 1) {
 
-						const p = getPreviousToken(elseStatement.getFirstToken());
+						const firstToken = elseStatement.getFirstToken();
 
-						if (p) {
+						if (firstToken) {
 
-							this.addFailure(p.getStart(this.sourceFile), p.getStart(this.sourceFile), NEW_LINE_AFTER_ELSE);
+							const p = getPreviousToken(firstToken);
+
+							if (p) {
+
+								this.addFailure(p.getStart(this.sourceFile), p.getStart(this.sourceFile), NEW_LINE_AFTER_ELSE);
+							}
 						}
 					}
 
@@ -151,21 +160,25 @@ class IfPaddingWalker extends Lint.AbstractWalker<void> {
 				});
 
 				const elseCloseBracket = elseStatement.getLastToken();
-				const elseCloseBracketStart = elseCloseBracket.getStart(this.sourceFile);
-				const elseCloseBracketLine = ts.getLineAndCharacterOfPosition(this.sourceFile, elseCloseBracketStart).line;
 
-				const lastBlockStatement = getPreviousToken(elseCloseBracket);
+				if (elseCloseBracket) {
 
-				if (lastBlockStatement) {
+					const elseCloseBracketStart = elseCloseBracket.getStart(this.sourceFile);
+					const elseCloseBracketLine = ts.getLineAndCharacterOfPosition(this.sourceFile, elseCloseBracketStart).line;
 
-					const previousTokenStart = lastBlockStatement.getStart(this.sourceFile);
-					const previousTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, previousTokenStart).line;
+					const lastBlockStatement = getPreviousToken(elseCloseBracket);
 
-					if (previousTokenLine !== elseCloseBracketLine - 1) {
+					if (lastBlockStatement) {
 
-						const closeStart = elseCloseBracket.getStart();
+						const previousTokenStart = lastBlockStatement.getStart(this.sourceFile);
+						const previousTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, previousTokenStart).line;
 
-						this.addFailure(closeStart, closeStart, NEW_LINE_END);
+						if (previousTokenLine !== elseCloseBracketLine - 1) {
+
+							const closeStart = elseCloseBracket.getStart();
+
+							this.addFailure(closeStart, closeStart, NEW_LINE_END);
+						}
 					}
 				}
 			}

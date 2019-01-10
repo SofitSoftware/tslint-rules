@@ -76,41 +76,50 @@ class ArrowFunctionPaddingWalker extends Lint.AbstractWalker<void> {
 
 		let stop = false;
 
-		if (node.body && node.body.getFirstToken().kind === ts.SyntaxKind.OpenBraceToken) {
+		if (node.body && node.body.getFirstToken()) {
 
-			node.body.forEachChild(n => {
+			const firstToken = node.body.getFirstToken();
 
-				if (stop) {
+			if (firstToken && firstToken.kind === ts.SyntaxKind.OpenBraceToken) {
 
-					return;
-				}
+				node.body.forEachChild(n => {
 
-				const firstChildLine = ts.getLineAndCharacterOfPosition(this.sourceFile, n.getStart(this.sourceFile)).line;
+					if (stop) {
 
-				if (firstChildLine <= line + 1) {
+						return;
+					}
 
-					this.addFailure(start, arrowFunctionEnd, NEW_LINE_AFTER);
-				}
+					const firstChildLine = ts.getLineAndCharacterOfPosition(this.sourceFile, n.getStart(this.sourceFile)).line;
 
-				stop = true;
-			});
+					if (firstChildLine <= line + 1) {
 
-			const closeBracket = node.body.getLastToken(this.sourceFile);
-			const closeBracketStart = closeBracket.getStart(this.sourceFile);
-			const closeBracketLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeBracketStart).line;
+						this.addFailure(start, arrowFunctionEnd, NEW_LINE_AFTER);
+					}
 
-			const lastBlockStatement = getPreviousToken(closeBracket);
+					stop = true;
+				});
 
-			if (lastBlockStatement) {
+				const closeBracket = node.body.getLastToken(this.sourceFile);
 
-				const previousTokenStart = lastBlockStatement.getStart(this.sourceFile);
-				const previousTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, previousTokenStart).line;
+				if (closeBracket) {
 
-				if (previousTokenLine !== closeBracketLine - 1) {
+					const closeBracketStart = closeBracket.getStart(this.sourceFile);
+					const closeBracketLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeBracketStart).line;
 
-					const closeStart = closeBracket.getStart();
+					const lastBlockStatement = getPreviousToken(closeBracket);
 
-					this.addFailure(closeStart, closeStart, NEW_LINE_END);
+					if (lastBlockStatement) {
+
+						const previousTokenStart = lastBlockStatement.getStart(this.sourceFile);
+						const previousTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, previousTokenStart).line;
+
+						if (previousTokenLine !== closeBracketLine - 1) {
+
+							const closeStart = closeBracket.getStart();
+
+							this.addFailure(closeStart, closeStart, NEW_LINE_END);
+						}
+					}
 				}
 			}
 		}

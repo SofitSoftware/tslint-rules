@@ -29,17 +29,21 @@ class MethodPaddingWalker extends Lint.AbstractWalker<void> {
 		if (node.body) {
 
 			const closeBracket = node.body.getLastToken(this.sourceFile);
-			const closeBracketStart = closeBracket.getStart(this.sourceFile);
-			const block = node.body.getChildAt(1).getChildren();
-			const firstBlockLine = ts.getLineAndCharacterOfPosition(this.sourceFile, block[0].getStart(this.sourceFile)).line;
-			const lastBlockLine = ts.getLineAndCharacterOfPosition(
-				this.sourceFile,
-				block[block.length - 1].getStart(this.sourceFile)
-			).line;
 
-			if (lastBlockLine - firstBlockLine >= MAX_LINES) {
+			if (closeBracket) {
 
-				this.addFailure(start, closeBracketStart, MAX_METHOD_LINES);
+				const closeBracketStart = closeBracket.getStart(this.sourceFile);
+				const block = node.body.getChildAt(1).getChildren();
+				const firstBlockLine = ts.getLineAndCharacterOfPosition(this.sourceFile, block[0].getStart(this.sourceFile)).line;
+				const lastBlockLine = ts.getLineAndCharacterOfPosition(
+					this.sourceFile,
+					block[block.length - 1].getStart(this.sourceFile)
+				).line;
+
+				if (lastBlockLine - firstBlockLine >= MAX_LINES) {
+
+					this.addFailure(start, closeBracketStart, MAX_METHOD_LINES);
+				}
 			}
 		}
 	}

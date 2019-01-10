@@ -96,21 +96,25 @@ class TryCatchPaddingWalker extends Lint.AbstractWalker<void> {
 	private checkLastBlock(node: ts.TryStatement) {
 
 		const closeBracket = node.tryBlock.getLastToken(this.sourceFile);
-		const closeBracketStart = closeBracket.getStart(this.sourceFile);
-		const closeBracketLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeBracketStart).line;
 
-		const lastBlockStatement = getPreviousToken(closeBracket);
+		if (closeBracket) {
 
-		if (lastBlockStatement) {
+			const closeBracketStart = closeBracket.getStart(this.sourceFile);
+			const closeBracketLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeBracketStart).line;
 
-			const previousTokenStart = lastBlockStatement.getStart(this.sourceFile);
-			const previousTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, previousTokenStart).line;
+			const lastBlockStatement = getPreviousToken(closeBracket);
 
-			if (previousTokenLine !== closeBracketLine - 1) {
+			if (lastBlockStatement) {
 
-				const closeStart = closeBracket.getStart();
+				const previousTokenStart = lastBlockStatement.getStart(this.sourceFile);
+				const previousTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, previousTokenStart).line;
 
-				this.addFailure(closeStart, closeStart, NEW_LINE_END);
+				if (previousTokenLine !== closeBracketLine - 1) {
+
+					const closeStart = closeBracket.getStart();
+
+					this.addFailure(closeStart, closeStart, NEW_LINE_END);
+				}
 			}
 		}
 	}
@@ -151,21 +155,25 @@ class TryCatchPaddingWalker extends Lint.AbstractWalker<void> {
 			});
 
 			const catchCloseBracket = catchStatement.getLastToken();
-			const catchCloseBracketStart = catchCloseBracket.getStart(this.sourceFile);
-			const elseCloseBracketLine = ts.getLineAndCharacterOfPosition(this.sourceFile, catchCloseBracketStart).line;
 
-			const lastBlockStatement = getPreviousToken(catchCloseBracket);
+			if (catchCloseBracket) {
 
-			if (lastBlockStatement) {
+				const catchCloseBracketStart = catchCloseBracket.getStart(this.sourceFile);
+				const elseCloseBracketLine = ts.getLineAndCharacterOfPosition(this.sourceFile, catchCloseBracketStart).line;
 
-				const previousTokenStart = lastBlockStatement.getStart(this.sourceFile);
-				const previousTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, previousTokenStart).line;
+				const lastBlockStatement = getPreviousToken(catchCloseBracket);
 
-				if (previousTokenLine !== elseCloseBracketLine - 1) {
+				if (lastBlockStatement) {
 
-					const closeStart = catchCloseBracket.getStart();
+					const previousTokenStart = lastBlockStatement.getStart(this.sourceFile);
+					const previousTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, previousTokenStart).line;
 
-					this.addFailure(closeStart, closeStart, NEW_LINE_END);
+					if (previousTokenLine !== elseCloseBracketLine - 1) {
+
+						const closeStart = catchCloseBracket.getStart();
+
+						this.addFailure(closeStart, closeStart, NEW_LINE_END);
+					}
 				}
 			}
 		}
