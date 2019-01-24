@@ -34,7 +34,7 @@ class MethodPaddingWalker extends Lint.AbstractWalker<void> {
 			const firstLine = ts.getLineAndCharacterOfPosition(this.sourceFile, firstTokenStart).line;
 			const lastLine = ts.getLineAndCharacterOfPosition(this.sourceFile, lastTokenStart).line;
 
-			if ((lastLine - firstLine - 2) >= MAX_LINES) {
+			if ((lastLine - firstLine - 2) > MAX_LINES) {
 
 				this.addFailure(firstTokenStart, lastTokenStart, MAX_METHOD_LINES);
 			}
