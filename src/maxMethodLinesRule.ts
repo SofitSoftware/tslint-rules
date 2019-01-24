@@ -1,7 +1,7 @@
 import * as Lint from 'tslint';
 import * as ts from 'typescript';
 
-const MAX_LINES = 25;
+const MAX_LINES = 30;
 const MAX_METHOD_LINES = `Max method lines is ${MAX_LINES}`;
 
 // The walker takes care of all the work.
