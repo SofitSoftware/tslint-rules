@@ -3,52 +3,65 @@ import * as Lint from 'tslint';
 import { getNextStatement, getPreviousStatement } from 'tsutils';
 import * as ts from 'typescript';
 
-const NEW_LINE_BEFORE = 'Missing blank line before variable declaration';
-const NEW_LINE_AFTER = 'Missing blank line after variable declaration';
+export const NEW_LINE_BEFORE = 'Missing blank line before variable declaration';
+export const NEW_LINE_AFTER = 'Missing blank line after variable declaration';
 
-// The walker takes care of all the work.
-class VariablePaddingWalker extends Lint.AbstractWalker<void> {
+class Walker extends Lint.RuleWalker {
 
-	public walk(sourceFile: ts.SourceFile) {
+	public visitVariableStatement(variable: ts.VariableStatement) {
 
-		const cb = (node: ts.Node): void => {
+		const start = variable.getStart();
+		const line = ts.getLineAndCharacterOfPosition(this.getSourceFile(), start).line;
 
-			if (node.kind === ts.SyntaxKind.VariableStatement) {
+		this.checkNextStatement(variable, line);
 
-				this.visitForDeclaration(node as ts.VariableStatement);
-			}
+		this.checkPrevStatement(variable, line);
 
-			return ts.forEachChild(node, cb);
-		};
+		this.checkParent(variable, line);
 
-		return ts.forEachChild(sourceFile, cb);
+		super.visitVariableStatement(variable);
 	}
 
-	public visitForDeclaration(node: ts.VariableStatement) {
+	private checkNextStatement(variable: ts.VariableStatement, line: number) {
 
-		const prev = getPreviousStatement(node);
-		const start = node.getStart(this.sourceFile);
-		const line = ts.getLineAndCharacterOfPosition(this.sourceFile, start).line;
+		const next = getNextStatement(variable);
 
-		const next = getNextStatement(node);
+		if (next && next.kind !== ts.SyntaxKind.VariableStatement) {
 
-		if (prev && line > 0) {
+			const nextLine = ts.getLineAndCharacterOfPosition(this.getSourceFile(), next.getStart()).line;
 
-			const prevLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.getEnd()).line;
+			if (nextLine === line + 1) {
 
-			if (prevLine === line - 1 && prev.kind !== ts.SyntaxKind.VariableStatement) {
-
-				this.addFailure(start, start, NEW_LINE_BEFORE);
+				this.addFailureAtNode(variable, NEW_LINE_AFTER);
 			}
 		}
+	}
 
-		if (next) {
+	private checkPrevStatement(variable: ts.VariableStatement, line: number) {
 
-			const nextLine = ts.getLineAndCharacterOfPosition(this.sourceFile, next.getStart(this.sourceFile)).line;
+		const prev = getPreviousStatement(variable);
 
-			if (nextLine === (line + 1) && next.kind !== ts.SyntaxKind.VariableStatement) {
+		if (prev && prev.kind !== ts.SyntaxKind.VariableStatement) {
 
-				this.addFailure(start, start, NEW_LINE_AFTER);
+			const prevLine = ts.getLineAndCharacterOfPosition(this.getSourceFile(), prev.getStart()).line;
+
+			if (prevLine === line - 1) {
+
+				this.addFailureAtNode(variable, NEW_LINE_BEFORE);
+			}
+		}
+	}
+
+	private checkParent(variable: ts.VariableStatement, line: number) {
+
+		if (variable.parent.kind !== ts.SyntaxKind.SourceFile) {
+
+			const parentBrackets = variable.parent.getChildAt(0);
+			const parentLine = ts.getLineAndCharacterOfPosition(this.getSourceFile(), parentBrackets.getStart()).line;
+
+			if (parentLine === line - 1) {
+
+				this.addFailureAtNode(variable, NEW_LINE_BEFORE);
 			}
 		}
 	}
@@ -58,6 +71,6 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 	public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
 
-		return this.applyWithWalker(new VariablePaddingWalker(sourceFile, this.ruleName, undefined));
+		return this.applyWithWalker(new Walker(sourceFile, this.getOptions()));
 	}
 }

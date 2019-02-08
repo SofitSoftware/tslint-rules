@@ -5,7 +5,8 @@
 	"main": "tslint.json",
 	"scripts": {
 		"build": "tsc -w --p ./",
-		"lint": "tslint --project ./"
+		"lint": "tslint --project ./",
+		"test": "jest --config ./jest.config.json --clearMocks"
 	},
 	"repository": {
 		"type": "git",
@@ -22,5 +23,10 @@
 		"tslint-eslint-rules": "^5.1.0",
 		"typescript": "^3.2.2"
 	},
-	"homepage": "https://github.com/SofitSoftware/tslint-rules#readme"
+	"homepage": "https://github.com/SofitSoftware/tslint-rules#readme",
+	"devDependencies": {
+		"@types/jest": "^23.3.14",
+		"jest": "^23.6.0",
+		"ts-jest": "^23.10.5"
+	}
 }

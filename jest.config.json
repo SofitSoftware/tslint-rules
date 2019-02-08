@@ -1,0 +1,17 @@
+{
+	"testEnvironment": "node",
+	"transform": {
+		"\\.(ts)$": "ts-jest"
+	},
+	"testMatch": [
+		"**/?!(*.e2e).spec.ts"
+	],
+	"moduleFileExtensions": [
+		"ts",
+		"tsx",
+		"js",
+		"jsx",
+		"json",
+		"node"
+	]
+}

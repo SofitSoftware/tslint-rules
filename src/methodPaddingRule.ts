@@ -70,7 +70,11 @@ class MethodPaddingWalker extends Lint.AbstractWalker<void> {
 
 		let stop = false;
 
-		if (node.body && node.modifiers && node.modifiers.length) {
+		const maria = [{
+			pedro: true
+		}];
+
+		if (node.body && node.modifiers && node.modifiers.length && maria) {
 
 			const bodyLine = ts.getLineAndCharacterOfPosition(this.sourceFile, node.body.getChildAt(0).getStart()).line;
 
