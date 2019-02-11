@@ -22,6 +22,7 @@ class Walker extends Lint.RuleWalker {
 				this.oneLineUnderneathTheOther(constructor);
 			}
 		}
+
 		super.visitConstructorDeclaration(constructor);
 	}
 
