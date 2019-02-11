@@ -6,17 +6,19 @@
 	],
 	"jsRules": {},
 	"rules": {
-		"if-padding": true,
-		"for-padding": true,
-		"function-padding": true,
-		"arrow-function-padding": true,
-		"method-padding": true,
+		"block-padding": true,
 		"class-padding": true,
 		"constructor-padding": true,
-		"try-catch-padding": true,
-		"variable-padding": true,
+		"dependency-injector-format":true,
+		"for-padding": true,
+		"function-padding": true,
+		"if-padding": true,
 		"last-line": true,
 		"max-method-lines": true,
+		"method-padding": true,
+		"no-async-without-await": true,
+		"try-catch-padding": true,
+		"variable-padding": true,
 		"member-access": [
 			true
 		],
@@ -74,7 +76,10 @@
 		"no-eval": true,
 		"no-floating-promises": true,
 		"no-for-in-array": true,
-		"no-implicit-dependencies": [true, "dev"],
+		"no-implicit-dependencies": [
+			true,
+			"dev"
+		],
 		"no-invalid-template-strings": true,
 		"no-invalid-this": true,
 		"no-null-keyword": false,
