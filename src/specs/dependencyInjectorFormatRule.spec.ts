@@ -25,7 +25,12 @@ describe('DependecyInjectorFormat tests', () => {
 		}`, 1],
 		[`class Den {
 			constructor (private readonly on: On) { console.log(on); }
-		}`, 1]
+		}`, 1],
+		[`class Dan {
+			constructor(adminUser: AdminUser, clientUser?: ClientUser) {
+				this.id = adminUser.id;
+			}
+		}`, 0]
 	])('%s', (src, count) => {
 
 		const result = lintRunner({ src, rule: RULE });

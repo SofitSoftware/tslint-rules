@@ -70,6 +70,7 @@ class Walk extends Lint.RuleWalker {
 			node.kind === ts.SyntaxKind.ArrowFunction ||
 			node.kind === ts.SyntaxKind.FunctionDeclaration
 		) {
+
 			return false;
 		}
 
@@ -92,6 +93,7 @@ class Walk extends Lint.RuleWalker {
 			node.kind === ts.SyntaxKind.ArrowFunction ||
 			node.kind === ts.SyntaxKind.FunctionDeclaration
 		) {
+
 			return false;
 		}
 

@@ -16,11 +16,40 @@ describe('LastLineRule', () => {
 			return false;
 		}`, 1],
 		[`if(true){
-			return true;
+			return 'só if';
 		}
 		else {
-			return false;
+			return 'so else';
 		}`, 1],
+		[`if(true){
+			return 'so if';
+		}
+		else
+		if(false&&maria) {
+			return 'else if';
+		}
+		else {
+			return 'só else';
+		}`, 2],
+		[`if(true){
+			return 'so if';
+		}
+		else if(false&&maria) {
+			return 'else if';
+		}`, 1],
+		[`if(true){
+			return 'so if';
+		} else
+		{
+			return 'else if';
+		}`, 1],
+		[`if(true){
+			return 'so if';
+		} else if(false&&maria) {
+			return 'else if';
+		} else {
+			return 'só else';
+		}`, 0],
 		[`console.log(true);
 
 		if(true){

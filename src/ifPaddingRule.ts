@@ -1,12 +1,6 @@
 import * as Lint from 'tslint';
 import ts from 'typescript';
 import { prevStatementChecker } from './helpers/prevChecker';
-import { getPreviousToken } from 'tsutils';
-
-// const NEW_LINE_BEFORE = 'Missing blank line before if';
-// const NEW_LINE_AFTER = 'Missing blank line after if';
-// const NEW_LINE_END = 'Not allowed blank line before if ends';
-// const NEW_LINE_AFTER_ELSE = 'Missing blank line after else';
 
 class Walk extends Lint.RuleWalker {
 
@@ -19,17 +13,12 @@ class Walk extends Lint.RuleWalker {
 
 		if (ifStatement.elseStatement) {
 
-			const prev = getPreviousToken(ifStatement.elseStatement);
+			const startLine = ts.getLineAndCharacterOfPosition(this.getSourceFile(), ifStatement.elseStatement.getStart()).line;
+			const prevLine = ts.getLineAndCharacterOfPosition(this.getSourceFile(), ifStatement.getChildAt(4).getEnd()).line;
 
-			if (prev) {
+			if (prevLine !== startLine) {
 
-				const startLine = ts.getLineAndCharacterOfPosition(this.getSourceFile(), ifStatement.elseStatement.getStart()).line;
-				const prevLine = ts.getLineAndCharacterOfPosition(this.getSourceFile(), prev.getEnd()).line;
-
-				if (prevLine !== startLine) {
-
-					this.addFailureAtNode(ifStatement, 'Not allowed break line on else');
-				}
+				this.addFailureAtNode(ifStatement.elseStatement, 'Not allowed break line on else');
 			}
 		}
 

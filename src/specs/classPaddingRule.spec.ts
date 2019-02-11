@@ -46,7 +46,25 @@ describe('ClassPadding', () => {
 		}`, 1],
 		[`class Maria { }`, 0],
 		[`@Entity()
-		class Maria { }`, 0]
+		class Maria { }`, 0],
+		[`@Injectable()
+		export class SubSystemService {
+
+			constructor(private readonly benchmarkingValidationsService: BenchmarkingValidationsService) { }
+
+			public async edit(id: number, subSystem: SubSystem) {
+
+				if (!subSystem.in_revision) {
+
+					await Promise.all([
+						this.benchmarkingValidationsService.validateInRevisionAssociations(SubSystem, subSystem),
+						this.benchmarkingValidationsService.validateEquivalentRecordAssociations(SubSystem, subSystem, id)
+					]);
+				}
+
+				return this.repository.updateOne(id, subSystem);
+			}
+		}`, 0]
 	])('%s', (src, count) => {
 
 		const result = lintRunner({ src, rule: RULE });

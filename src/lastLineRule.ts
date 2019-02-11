@@ -1,5 +1,5 @@
 import * as Lint from 'tslint';
-import * as ts from 'typescript';
+import ts from 'typescript';
 
 const NOT_ALLOWED_LINE = 'Not allowed empty line on end of file';
 

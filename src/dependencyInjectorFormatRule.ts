@@ -1,5 +1,5 @@
 import * as Lint from 'tslint';
-import * as ts from 'typescript';
+import ts from 'typescript';
 
 const NOT_ALLOWED_BREAK_LINE = 'Not allowed break line with one dependency injection';
 const NOT_ALLOWED_ALL_IN_THE_SAME = 'Not allowed body in the same line';
@@ -12,14 +12,16 @@ class Walker extends Lint.RuleWalker {
 
 	public visitConstructorDeclaration(constructor: ts.ConstructorDeclaration) {
 
-		if (constructor.parameters.length === 1) {
+		if (constructor.parameters.every(p => p.modifiers !== undefined)) {
 
-			this.allInOneLine(constructor);
-		} else if (constructor.parameters.length > 1) {
+			if (constructor.parameters.length === 1) {
 
-			this.oneLineUnderneathTheOther(constructor);
+				this.allInOneLine(constructor);
+			} else if (constructor.parameters.length > 1) {
+
+				this.oneLineUnderneathTheOther(constructor);
+			}
 		}
-
 		super.visitConstructorDeclaration(constructor);
 	}
 

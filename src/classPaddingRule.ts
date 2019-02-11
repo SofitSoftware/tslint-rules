@@ -1,7 +1,6 @@
 import * as Lint from 'tslint';
-// tslint:disable-next-line:no-implicit-dependencies
-import { getPreviousToken } from 'tsutils';
-import * as ts from 'typescript';
+import ts from 'typescript';
+import { prevTokenChecker } from './helpers/prevChecker';
 
 class Walker extends Lint.RuleWalker {
 
@@ -9,17 +8,9 @@ class Walker extends Lint.RuleWalker {
 
 		this.checkBody(classDeclaration);
 
-		const prev = getPreviousToken(classDeclaration);
+		if (prevTokenChecker(classDeclaration, this.getSourceFile())) {
 
-		if (prev) {
-
-			const startLine = ts.getLineAndCharacterOfPosition(this.getSourceFile(), classDeclaration.getStart()).line;
-			const prevLine = ts.getLineAndCharacterOfPosition(this.getSourceFile(), prev.getStart()).line;
-
-			if (prevLine === (startLine - 1)) {
-
-				this.addFailureAtNode(classDeclaration, 'line before');
-			}
+			this.addFailureAtNode(classDeclaration, 'Class must have a line before');
 		}
 
 		super.visitClassDeclaration(classDeclaration);
@@ -29,7 +20,7 @@ class Walker extends Lint.RuleWalker {
 
 		const endLine = ts.getLineAndCharacterOfPosition(this.getSourceFile(), classDeclaration.getEnd()).line;
 
-		if (classDeclaration.getChildAt(3).getChildCount() > 0) {
+		if (classDeclaration.getChildren()[classDeclaration.getChildCount() - 2].getChildCount() > 0) {
 
 			this.addBody(classDeclaration, endLine);
 		} else {
@@ -54,11 +45,11 @@ class Walker extends Lint.RuleWalker {
 
 		const bodyStartLine = ts.getLineAndCharacterOfPosition(
 			this.getSourceFile(),
-			classDeclaration.getChildAt(3).getStart()
+			classDeclaration.getChildren()[classDeclaration.getChildCount() - 2].getStart()
 		).line;
 		const bodyEndLine = ts.getLineAndCharacterOfPosition(
 			this.getSourceFile(),
-			classDeclaration.getChildAt(3).getEnd()
+			classDeclaration.getChildren()[classDeclaration.getChildCount() - 2].getEnd()
 		).line;
 
 		if (bodyStartLine === (startLine + 1)) {

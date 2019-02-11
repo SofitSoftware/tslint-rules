@@ -1,9 +1,6 @@
 import * as Lint from 'tslint';
-// tslint:disable-next-line:no-implicit-dependencies
-// import { getPreviousToken } from 'tsutils';
-import * as ts from 'typescript';
+import ts from 'typescript';
 
-// const NEW_LINE_BEFORE = 'Missing blank line before method declaration';
 const NEW_LINE_AFTER = 'Missing blank line after block declaration';
 const NEW_LINE_END = 'Not allowed blank line before block ends';
 
@@ -11,9 +8,12 @@ class Walker extends Lint.RuleWalker {
 
 	public visitBlock(block: ts.Block) {
 
-		this.hasLineBetweenBlockStartsAndContent(block);
+		if (block.getChildAt(1).getChildCount() > 0) {
 
-		this.hasntLineBetweenBlockEndsAndContent(block);
+			this.hasLineBetweenBlockStartsAndContent(block);
+
+			this.hasntLineBetweenBlockEndsAndContent(block);
+		}
 
 		super.visitBlock(block);
 	}

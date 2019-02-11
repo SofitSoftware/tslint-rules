@@ -1,7 +1,7 @@
 import * as Lint from 'tslint';
 // tslint:disable-next-line:no-implicit-dependencies
 import { getNextStatement, getPreviousStatement } from 'tsutils';
-import * as ts from 'typescript';
+import ts from 'typescript';
 
 export const NEW_LINE_BEFORE = 'Missing blank line before variable declaration';
 export const NEW_LINE_AFTER = 'Missing blank line after variable declaration';

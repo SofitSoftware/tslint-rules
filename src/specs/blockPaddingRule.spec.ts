@@ -55,7 +55,10 @@ describe('blockPadding Rule', () => {
 			console.log(0/0);
 		} catch(e){
 			console.log(0)
-		}`, 2]
+		}`, 2],
+		[`done(() => {
+			return 'maria';
+		})`, 1]
 		])('%s should throw error for line after method', (src: string, count = 1) => {
 
 			const result = lintRunner({ src, rule: RULE });
@@ -132,6 +135,11 @@ describe('blockPadding Rule', () => {
 			console.log(false)
 
 		}`, 2],
+		[`done(() => {
+
+			return 'maria';
+
+		})`, 1],
 		[`for (let i = 0; i < 10; i++) {
 
 			console.log(i);
@@ -177,6 +185,9 @@ describe('blockPadding Rule', () => {
 			joao();
 		}`],
 		[`class A {
+			constructor(private jj: JJ) {}
+		}`],
+		[`class A {
 			public b() {
 
 				console.log(1);
@@ -186,6 +197,7 @@ describe('blockPadding Rule', () => {
 
 			expect(result.errorCount).toBe(1);
 		});`],
+		[`done(() => 'maria')`],
 		[`function maria(){
 
 			console.log('true');
@@ -203,14 +215,14 @@ describe('blockPadding Rule', () => {
 		} else {
 
 			console.log(false);
-		}`, 2],
+		}`],
 		[`if (true) {
 
 			console.log(true);
 		} else if (false) {
 
 			console.log(false);
-		}`, 2],
+		}`],
 		[`for (let i = 0; i < 10; i++) {
 
 			console.log(i);
@@ -229,8 +241,8 @@ describe('blockPadding Rule', () => {
 		} catch(e){
 
 			console.log(0);
-		}`, 2]
-	])('%s should throw error for line after method', (src: string) => {
+		}`]
+	])('%s should not throw error for line after method', (src: string) => {
 
 		const result = lintRunner({ src, rule: RULE });
 
