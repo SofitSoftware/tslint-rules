@@ -24,7 +24,15 @@ describe('maria', () => {
 		[`const maria = true;
 		const pedro = false;
 
-		console.log(maria, pedro);`, 0, []]
+		console.log(maria, pedro);`, 0, []],
+		[`function maria() {
+
+			const objeto = {
+				um_objeto: 3,
+				outra_key: 2
+			};
+			chamaAFuncao();
+		}`, 1, [NEW_LINE_AFTER]]
 	])('%s', (src: string, count: number, errors: string[]) => {
 
 		const result = lintRunner({

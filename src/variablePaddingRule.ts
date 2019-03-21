@@ -10,14 +10,14 @@ class Walker extends Lint.RuleWalker {
 
 	public visitVariableStatement(variable: ts.VariableStatement) {
 
-		const start = variable.getStart();
-		const line = ts.getLineAndCharacterOfPosition(this.getSourceFile(), start).line;
+		const startLine = ts.getLineAndCharacterOfPosition(this.getSourceFile(), variable.getStart()).line;
+		const endLine = ts.getLineAndCharacterOfPosition(this.getSourceFile(), variable.getEnd()).line;
 
-		this.checkNextStatement(variable, line);
+		this.checkNextStatement(variable, endLine);
 
-		this.checkPrevStatement(variable, line);
+		this.checkPrevStatement(variable, startLine);
 
-		this.checkParent(variable, line);
+		this.checkParent(variable, startLine);
 
 		super.visitVariableStatement(variable);
 	}
