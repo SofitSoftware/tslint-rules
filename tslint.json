@@ -127,7 +127,7 @@
 		],
 		"max-line-length": [
 			true,
-			120
+			150
 		],
 		"no-default-export": true,
 		"no-duplicate-imports": true,
