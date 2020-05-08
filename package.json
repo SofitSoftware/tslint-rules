@@ -1,6 +1,6 @@
 {
   "name": "@sofit/tslint-rules",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Sofit View tslint rules",
   "main": "tslint.json",
   "scripts": {
@@ -18,10 +18,10 @@
     "url": "https://github.com/SofitSoftware/tslint-rules/issues"
   },
   "dependencies": {
-    "@types/node": "^9.6.6",
-    "tslint": "^5.12.0",
-    "tslint-eslint-rules": "^5.1.0",
-    "typescript": "^3.2.2"
+    "@types/node": "^9.6.55",
+    "tslint": "^5.20.1",
+    "tslint-eslint-rules": "^5.4.0",
+    "typescript": "^3.8.3"
   },
   "homepage": "https://github.com/SofitSoftware/tslint-rules#readme",
   "devDependencies": {

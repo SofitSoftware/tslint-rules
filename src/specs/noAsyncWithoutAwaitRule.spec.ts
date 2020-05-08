@@ -1,5 +1,5 @@
 import { lintRunner } from '../helpers/lintRunner';
-import { Rule } from '../noAsyncWithoutAwaitRule';
+import { NO_ASYNC_WITHOUT_AWAIT } from '../noAsyncWithoutAwaitRule';
 
 const rule = 'no-async-without-await';
 
@@ -32,7 +32,7 @@ describe('noAsyncWithoutAwait Rule', () => {
 
 			expect(failure.getStartPosition().getPosition()).toEqual(startPosition);
 			expect(failure.getEndPosition().getPosition()).toEqual(endPosition);
-			expect(failure.getFailure()).toBe(Rule.FAILURE_STRING);
+			expect(failure.getFailure()).toBe(NO_ASYNC_WITHOUT_AWAIT);
 		});
 
 		it('should not fail when the async function has an await', () => {
